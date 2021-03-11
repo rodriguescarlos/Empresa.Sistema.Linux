@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build-env
+WORKDIR /app
+
+LABEL version="1.0" maintainer="CarlosRodrigues"
+
+# Exibir a versão do SDK do .NET 2.2
+#RUN dotnet --version
+#RUN dotnet --info
+
+# Copiar sln e restaurar dependencias
+COPY . ./
+RUN dotnet restore Empresa.Sistema.sln
+
+# Build da aplicacao
+COPY . ./
+RUN dotnet publish -c Release -o out Empresa.Sistema.sln
+
+# Build da imagem
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2
+WORKDIR /app
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "Empresa.Sistema.Cadastro.API.dll"]
